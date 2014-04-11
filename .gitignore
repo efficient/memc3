@@ -42,6 +42,7 @@ gen-cpp
 gen-rb
 install-sh
 libtool
+memc3
 memcached
 memcached-debug
 missing

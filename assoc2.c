@@ -1,6 +1,6 @@
 /* -*- Mode: C; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Hash table -- using cuckoo hashing
+ * Hash table implementation -- multi-reader/single-writer cuckoo hashing
  *
  */
 
@@ -20,8 +20,8 @@
 #include <xmmintrin.h>
 #include <immintrin.h>
 
-#include "bench_config.h"
-#include "bench_util.h"
+#include "memc3_config.h"
+#include "memc3_util.h"
 #include "bit_util.h"
 
 

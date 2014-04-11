@@ -5097,7 +5097,7 @@ int main (int argc, char **argv) {
     preallocate = true;
     slabs_init(settings.maxbytes, settings.factor, preallocate);
     
-    print_bench_settings();
+    print_memc3_settings();
 
     /*
      * ignore SIGPIPE signals; we can use errno == EPIPE if we

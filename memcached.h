@@ -24,9 +24,8 @@
 
 #include "sasl_defs.h"
 
-// added by Bin
-#include "bench_config.h"
-#include "bench_util.h"
+#include "memc3_config.h"
+#include "memc3_util.h"
 
 /** Maximum length of a key. */
 #define KEY_MAX_LENGTH 250

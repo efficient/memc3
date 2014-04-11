@@ -1,7 +1,7 @@
 #ifndef _BENCH_COMMON_H_
 #define _BENCH_COMMON_H_
 
-#include "bench_config.h"
+#include "memc3_config.h"
 
 #define MILLION 1000000
 

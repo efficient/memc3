@@ -11,20 +11,18 @@
 
 #include "memcached.h"
 
-#include "bench_util.h"
+#include "memc3_util.h"
 
-void print_bench_settings()
+void print_memc3_settings()
 {
 
-    printf("bench settings:\n");
+    printf("memc3 settings:\n");
     printf("\tkey_len = %d bytes\n", NKEY);
     printf("\tval_len = %d bytes\n", NVAL);
     
 #ifdef TEST_ORIGINAL 
     printf("\thashtable = built-in hashtable\n");
 #endif
-
-
 
 #ifdef TEST_LRU
     printf("\teviction = LRU\n");

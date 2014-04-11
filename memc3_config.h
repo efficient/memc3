@@ -1,5 +1,5 @@
-#ifndef __BENCH_CONFIG__
-#define __BENCH_CONFIG__
+#ifndef __MEMC3_CONFIG__
+#define __MEMC3_CONFIG__
 
 /*
  * size of the key in bytes
@@ -34,15 +34,12 @@
 /*
  * enable huge table to reduce TLB misses
  */
-#define ENABLE_HUGEPAGE
+//#define ENABLE_HUGEPAGE
 
 /*
  * enable key comparison by casting bits into ints
  */
 #define ENABLE_INT_KEYCMP
-
-
-
 
 /*
  * disable locking

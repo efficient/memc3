@@ -1,13 +1,13 @@
 #ifndef __BENCH_UTIL__
 #define __BENCH_UTIL__
-#include "bench_config.h"
+#include "memc3_config.h"
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 /* forward declaration */
-void print_bench_settings(void);
+void print_memc3_settings(void);
 
 void *alloc(size_t size);
 void dealloc(void *p);
@@ -15,7 +15,6 @@ void dealloc(void *p);
 double timeval_diff(struct timeval *start, struct timeval *end);
 int get_cpunum(void);
 
-// added by Bin,
 /* Obtain a backtrace and print it to stdout. */
 static inline void
 print_trace (void)
