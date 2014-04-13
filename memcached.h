@@ -533,8 +533,8 @@ static inline int mutex_lock(pthread_mutex_t *mutex)
 
 #include "stats.h"
 #include "slabs.h"
-#include "assoc.h"
-#include "assoc2.h"
+#include "assoc_chain.h"
+#include "assoc_cuckoo.h"
 #include "items.h"
 #include "trace.h"
 #include "hash.h"

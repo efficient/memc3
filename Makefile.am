@@ -12,8 +12,8 @@ memc3_SOURCES = memcached.c memcached.h \
                 hash.c hash.h \
                 slabs.c slabs.h \
                 items.c items.h \
-                assoc.c assoc.h \
-                assoc2.c assoc2.h \
+                assoc_chain.c assoc_chain.h \
+                assoc_cuckoo.c assoc_cuckoo.h \
                 thread.c daemon.c \
                 stats.c stats.h \
                 util.c util.h \
