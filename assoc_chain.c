@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
 
 static pthread_cond_t maintenance_cond = PTHREAD_COND_INITIALIZER;
 

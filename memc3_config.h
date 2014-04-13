@@ -7,62 +7,57 @@
 #define NKEY 16
 #define NVAL 32
 
-//#define TEST_ORIGINAL 1  
-#define TEST_CUCKOO 1
+//#define MEMC3_ASSOC_CHAIN 1  
+#define MEMC3_ASSOC_CUCKOO 1
 
 
 /*
  * make sure one and only one option above is enabled
  */
-#if (TEST_CUCKOO + TEST_ORIGINAL != 1)
+#if (MEMC3_ASSOC_CUCKOO + MEMC3_ASSOC_CHAIN != 1)
 #error "you must specify one and only one hashtable"
 #endif
 
 
-//#define TEST_LRU 1
-#define TEST_CLOCK 1
-#if (TEST_LRU + TEST_CLOCK != 1)
+//#define MEMC3_CACHE_LRU 1
+#define MEMC3_CACHE_CLOCK 1
+#if (MEMC3_CACHE_LRU + MEMC3_CACHE_CLOCK != 1)
 #error "you must specify one and only one eviction policy"
 #endif
-
-/*
- * count the perf 
- */
-//#define DO_PERF_COUNTING
 
 
 /*
  * enable huge table to reduce TLB misses
  */
-//#define ENABLE_HUGEPAGE
+//#define MEMC3_ENABLE_HUGEPAGE
 
 /*
  * enable key comparison by casting bits into ints
  */
-#define ENABLE_INT_KEYCMP
+#define MEMC3_ENABLE_INT_KEYCMP
 
 /*
  * disable locking
  */
-//#define NO_LOCKING 1
+//#define MEMC3_LOCK_NONE 1
 
 /*
  * enable global locking
  */
-//#define ENABLE_GLOBAL_LOCK 1
+//#define MEMC3_LOCK_GLOBAL 1
 
 /*
  * enable bucket locking
  */
-//#define ENABLE_FG_LOCK    1
+//#define MEMC3_LOCK_FINEGRAIN    1
 
 /*
  * enable optimistic locking
  */
-#define ENABLE_OPT_LOCK    1
+#define MEMC3_LOCK_OPT    1
 
 
-#if (ENABLE_OPT_LOCK + ENABLE_FG_LOCK + ENABLE_GLOBAL_LOCK + NO_LOCKING != 1)
+#if (MEMC3_LOCK_OPT + MEMC3_LOCK_FINEGRAIN + MEMC3_LOCK_GLOBAL + MEMC3_LOCK_NONE != 1)
 #error "you must specify one and only locking policy"
 #endif
 
@@ -70,14 +65,11 @@
 /*
  * enable tag 
  */
-#define ENABLE_TAG
+#define MEMC3_ENABLE_TAG
 
 /*
  * enable parallel cuckoo
  */
-#define PAR_CUCKOO_WIDTH 1
-
-//#define PRINT_LF
-//#define COUNT_LARGEST_BUCKET
+#define MEMC3_ASSOC_CUCKOO_WIDTH 1
 
 #endif

@@ -327,12 +327,12 @@ extern struct settings settings;
  * Structure for storing items within memcached.
  */
 typedef struct _stritem {
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     struct _stritem *next;
     struct _stritem *prev;
 #endif 
 
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
     struct _stritem *h_next;    /* hash chain next */
 #endif
     rel_time_t      time;       /* least recent access */
@@ -357,14 +357,14 @@ typedef struct _stritem {
     /* then data with terminating \r\n (no terminating null; it's binary!) */
 } item;
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
 typedef struct _slabbed_item {
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     struct _stritem *next;
     struct _stritem *prev;
 #endif 
 
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
     struct _stritem *h_next;    /* hash chain next */
 #endif
     rel_time_t      time;       /* least recent access */
@@ -623,7 +623,7 @@ extern void drop_privileges(void);
 #define after_write(it) \
     memory_barrier();                           \
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
 
 //  keyver array has 8192 buckets,
 #define  keyver_count ((unsigned long int)1 << (13))

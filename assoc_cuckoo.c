@@ -25,7 +25,7 @@
 #include "bit_util.h"
 
 
-#if defined(ENABLE_FG_LOCK)
+#if defined(MEMC3_LOCK_FINEGRAIN)
 
 #define fg_lock_count ((unsigned long int)1 << (13))
 #define fg_lock_mask (fg_lock_count - 1)
@@ -124,11 +124,11 @@ void assoc2_init(const int hashtable_init) {
     memset(buckets, 0, sizeof(struct Bucket) * hashsize);
 
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
     memset(keyver_array, 0, sizeof(keyver_array));
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
     for (size_t i = 0; i < fg_lock_count; i++) {
         pthread_spin_init(&fg_locks[i], PTHREAD_PROCESS_PRIVATE);
     }
@@ -154,12 +154,12 @@ void assoc2_destroy() {
 static __attribute__ ((unused))
 item *try_read(const char *key, const size_t nkey, TagType tag, size_t i) {
 
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
     volatile uint32_t tmp = *((uint32_t *) &(buckets[i]));
 #endif
 
     for (size_t j = 0; j < bucket_size; j ++) {
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
         //if (IS_TAG_EQUAL(buckets[i], j, tag))
         uint8_t ch = ((uint8_t*) &tmp)[j];
         if (ch == tag)
@@ -176,7 +176,7 @@ item *try_read(const char *key, const size_t nkey, TagType tag, size_t i) {
 
             item *it = buckets[i].vals[j];
             
-#ifndef ENABLE_TAG
+#ifndef MEMC3_ENABLE_TAG
             if (it == NULL)
                 return NULL;
 #endif
@@ -201,14 +201,14 @@ item *assoc2_find(const char *key, const size_t nkey, const uint32_t hv) {
     item *result = NULL;
 
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
     size_t lock = _lock_index(i1, i2, tag);
     uint32_t vs, ve;
 TryRead:
     vs = read_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
     fg_lock(i1, i2);
 #endif
 
@@ -223,14 +223,14 @@ TryRead:
     /* else result = r2; */
 
 
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
     volatile uint32_t tags1, tags2;
     tags1 = *((uint32_t *) &(buckets[i1]));
     tags2 = *((uint32_t *) &(buckets[i2]));
 #endif
 
     for (size_t j = 0; j < 4; j ++) {
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
 
         uint8_t ch = ((uint8_t*) &tags1)[j];
         if (ch == tag)
@@ -239,7 +239,7 @@ TryRead:
 
             item *it = buckets[i1].vals[j];
             
-//#ifndef ENABLE_TAG
+//#ifndef MEMC3_ENABLE_TAG
             if (it == NULL)
                 continue;
 //#endif
@@ -255,7 +255,7 @@ TryRead:
     {
 		//tags2 = *((uint32_t *) &(buckets[i2]));
         for (size_t j = 0; j < 4; j ++) {
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
 
             uint8_t ch = ((uint8_t*) &tags2)[j];
             if (ch == tag)
@@ -264,7 +264,7 @@ TryRead:
 
                 item *it = buckets[i2].vals[j];
             
-//#ifndef ENABLE_TAG
+//#ifndef MEMC3_ENABLE_TAG
                 if (it == NULL)
                     continue;
 //#endif
@@ -286,14 +286,14 @@ TryRead:
     //   result = try_read(key, nkey, tag, i2);
     //}
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
     ve = read_keyver(lock);
 
     if (vs & 1 || vs != ve)
         goto TryRead;
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
     fg_unlock(i1, i2);
 #endif
 
@@ -309,9 +309,9 @@ TryRead:
  * @param  depth: the current cuckoo depth
  */
 
-size_t    cp_buckets[MAX_CUCKOO_COUNT][PAR_CUCKOO_WIDTH];
-size_t    cp_slots[MAX_CUCKOO_COUNT][PAR_CUCKOO_WIDTH];
-ValueType cp_vals[MAX_CUCKOO_COUNT][PAR_CUCKOO_WIDTH];
+size_t    cp_buckets[MAX_CUCKOO_COUNT][MEMC3_ASSOC_CUCKOO_WIDTH];
+size_t    cp_slots[MAX_CUCKOO_COUNT][MEMC3_ASSOC_CUCKOO_WIDTH];
+ValueType cp_vals[MAX_CUCKOO_COUNT][MEMC3_ASSOC_CUCKOO_WIDTH];
 int       kick_count = 0;
 
 static int cp_search(size_t depth_start, size_t *cp_index) {
@@ -327,7 +327,7 @@ static int cp_search(size_t depth_start, size_t *cp_index) {
         /*
          * Check if any slot is already free
          */
-        for (size_t idx = 0; idx < PAR_CUCKOO_WIDTH; idx ++) {
+        for (size_t idx = 0; idx < MEMC3_ASSOC_CUCKOO_WIDTH; idx ++) {
             size_t i = from[idx];
             size_t j;
             for (j = 0; j < bucket_size; j ++) {
@@ -345,7 +345,7 @@ static int cp_search(size_t depth_start, size_t *cp_index) {
             to[idx]    = _alt_index(i, buckets[i].tags[j]);
         }
 
-        kick_count += PAR_CUCKOO_WIDTH;
+        kick_count += MEMC3_ASSOC_CUCKOO_WIDTH;
         depth ++;
     }
 
@@ -374,12 +374,12 @@ static int cp_backmove(size_t depth_start, size_t idx) {
 
         assert(IS_SLOT_EMPTY(i2,j2));
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
         size_t lock   = _lock_index(i1, i2, 0);
         incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
         fg_lock(i1, i2);
 #endif
     
@@ -395,11 +395,11 @@ static int cp_backmove(size_t depth_start, size_t idx) {
 #endif
 
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
         incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
         fg_unlock(i1, i2);
 #endif
         depth --;
@@ -443,11 +443,11 @@ static bool try_add(item* it, TagType tag, size_t i, size_t lock) {
     for (size_t j = 0; j < bucket_size; j ++) {
         if (IS_SLOT_EMPTY(i, j)) {
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
             incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
             fg_lock(i, i);
 #endif
 
@@ -472,11 +472,11 @@ static bool try_add(item* it, TagType tag, size_t i, size_t lock) {
             }
 #endif
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
             incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
             fg_unlock(i, i);
 #endif
 
@@ -505,8 +505,8 @@ int assoc2_insert(item *it, const uint32_t hv) {
 
     int idx;
     size_t depth = 0;
-    for (idx = 0; idx < PAR_CUCKOO_WIDTH; idx ++) {
-        if (idx< PAR_CUCKOO_WIDTH/2) 
+    for (idx = 0; idx < MEMC3_ASSOC_CUCKOO_WIDTH; idx ++) {
+        if (idx< MEMC3_ASSOC_CUCKOO_WIDTH/2) 
             cp_buckets[depth][idx] = i1;
         else
             cp_buckets[depth][idx] = i2;
@@ -530,25 +530,25 @@ int assoc2_insert(item *it, const uint32_t hv) {
 
 static bool try_del(const char*key, const size_t nkey, TagType tag, size_t i, size_t lock) {
     for (size_t j = 0; j < bucket_size; j ++) {
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
         //if (IS_TAG_EQUAL(i, j, tag))
         if (IS_TAG_EQUAL(buckets[i], j, tag))
 #endif
         {
             item *it = buckets[i].vals[j];
 
-#ifndef ENABLE_TAG
+#ifndef MEMC3_ENABLE_TAG
             if (it == NULL)
                 return false;
 #endif
 
             if (keycmp(key, ITEM_key(it), nkey)) {
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
                 incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
                 fg_lock(i, i);
 #endif
 
@@ -556,11 +556,11 @@ static bool try_del(const char*key, const size_t nkey, TagType tag, size_t i, si
                 buckets[i].vals[j] = 0;
                 hash_items --;
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
                 incr_keyver(lock);
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
                 fg_unlock(i, i);
 #endif
 

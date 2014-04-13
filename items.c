@@ -36,7 +36,7 @@ typedef struct {
     uint64_t evicted_unfetched;
 } itemstats_t;
 
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
 static item *heads[LARGEST_ID];
 static item *tails[LARGEST_ID];
 static unsigned int sizes[LARGEST_ID];
@@ -108,11 +108,11 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
 
     if ((it = slabs_alloc(ntotal, id)) == NULL) {
         item *search = NULL;
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
         search = tails[id];
 #endif
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
         search = slabs_cache_evict(id);
 #endif
 
@@ -140,7 +140,7 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
 
         uint32_t old_hv = hash(ITEM_key(it), it->nkey, 0);
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
         TagType tag = _tag_hash(old_hv);
         size_t i1   = _index_hash(old_hv);
         size_t i2   = _alt_index(i1, tag);
@@ -152,13 +152,13 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
         /* Initialize the item block: */
         it->slabs_clsid = 0;
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
         incr_keyver(lock);
 #endif
     }
 
     assert(it->slabs_clsid == 0);
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     assert(it != heads[id]);
 #endif
 
@@ -170,10 +170,10 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
      */
     //it->refcount = 1;     /* the caller will have a reference */
     //mutex_unlock(&cache_lock);
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     it->next = it->prev = 0;
 #endif
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
     it->h_next = 0;
 #endif
     it->slabs_clsid = id;
@@ -200,7 +200,7 @@ void item_free(item *it) {
     size_t ntotal = ITEM_ntotal(it);
     unsigned int clsid;
     assert((it->it_flags & ITEM_LINKED) == 0);
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     assert(it != heads[it->slabs_clsid]);
     assert(it != tails[it->slabs_clsid]);
 #endif
@@ -233,7 +233,7 @@ bool item_size_ok(const size_t nkey, const int flags, const int nbytes) {
 }
 
 static void item_link_q(item *it) { /* item is the new head */
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     item **head, **tail;
     assert(it->slabs_clsid < LARGEST_ID);
     assert((it->it_flags & ITEM_SLABBED) == 0);
@@ -253,7 +253,7 @@ static void item_link_q(item *it) { /* item is the new head */
 }
 
 static void item_unlink_q(item *it) {
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     item **head, **tail;
     assert(it->slabs_clsid < LARGEST_ID);
     head = &heads[it->slabs_clsid];
@@ -303,11 +303,11 @@ int do_item_link_nolock(item *it, const uint32_t hv) {
     /* Allocate a new CAS ID on link. */
     ITEM_set_cas(it, (settings.use_cas) ? get_cas_id() : 0);
     int ret;
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
     ret = assoc_insert(it, hv);
 #endif
 
-#ifdef TEST_CUCKOO
+#ifdef MEMC3_ASSOC_CUCKOO
     ret = assoc2_insert(it, hv);
 #endif
     if (ret == 0) {
@@ -341,11 +341,11 @@ void do_item_unlink_nolock(item *it, const uint32_t hv) {
         stats.curr_items -= 1;
         STATS_UNLOCK();
         
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
         assoc_delete(ITEM_key(it), it->nkey, hv);
 #endif
 
-#ifdef TEST_CUCKOO
+#ifdef MEMC3_ASSOC_CUCKOO
         assoc2_delete(ITEM_key(it), it->nkey, hv);
 #endif
         item_unlink_q(it);
@@ -368,7 +368,7 @@ void do_item_update(item *it) {
     MEMCACHED_ITEM_UPDATE(ITEM_key(it), it->nkey, it->nbytes);
     if (it->time < current_time - ITEM_UPDATE_INTERVAL) {
 
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
         mutex_lock(&cache_lock);
         //assert((it->it_flags & ITEM_SLABBED) == 0);
         if ((it->it_flags & ITEM_LINKED) != 0) {
@@ -382,7 +382,7 @@ void do_item_update(item *it) {
         mutex_unlock(&cache_lock);
 #endif
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
         slabs_cache_update(it);
 #endif
 
@@ -421,13 +421,13 @@ void do_item_stats_sizes(ADD_STAT add_stats, void *c) {
 /** wrapper around assoc_find which does the lazy expiration logic */
 item *do_item_get(const char *key, const size_t nkey, const uint32_t hv) {
 
-#ifdef TEST_ORIGINAL
+#ifdef MEMC3_ASSOC_CHAIN
     //mutex_lock(&cache_lock);
     item *it = assoc_find(key, nkey, hv);
     //mutex_unlock(&cache_lock);
 #endif
 
-#ifdef TEST_CUCKOO
+#ifdef MEMC3_ASSOC_CUCKOO
     item *it = assoc2_find(key, nkey, hv);
 #endif
 

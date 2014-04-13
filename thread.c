@@ -110,13 +110,13 @@ unsigned short refcount_decr(unsigned short *refcount) {
 }
 
 void item_lock(uint32_t hv) {
-#ifdef TEST_ORIGINAL 
+#ifdef MEMC3_ASSOC_CHAIN 
     mutex_lock(&item_locks[hv & item_lock_mask]);
 #endif
 }
 
 void item_unlock(uint32_t hv) {
-#ifdef TEST_ORIGINAL 
+#ifdef MEMC3_ASSOC_CHAIN 
     pthread_mutex_unlock(&item_locks[hv & item_lock_mask]);
 #endif
 }

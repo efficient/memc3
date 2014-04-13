@@ -20,15 +20,15 @@ void print_memc3_settings()
     printf("\tkey_len = %d bytes\n", NKEY);
     printf("\tval_len = %d bytes\n", NVAL);
     
-#ifdef TEST_ORIGINAL 
+#ifdef MEMC3_ASSOC_CHAIN 
     printf("\thashtable = built-in hashtable\n");
 #endif
 
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     printf("\teviction = LRU\n");
 #endif
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
     printf("\teviction = CLOCK\n");
 #endif
 
@@ -37,42 +37,42 @@ void print_memc3_settings()
 #endif
 
 
-#ifdef ENABLE_HUGEPAGE
+#ifdef MEMC3_ENABLE_HUGEPAGE
     printf("\t+hugepage\n");
 #endif
 
-#ifdef ENABLE_INT_KEYCMP
+#ifdef MEMC3_ENABLE_INT_KEYCMP
     printf("\t+int_keycmp\n");
 #endif
 
-#ifdef TEST_CUCKOO
+#ifdef MEMC3_ASSOC_CUCKOO
 
     printf("\t+cuckoo \n");
 
-#ifdef ENABLE_TAG
+#ifdef MEMC3_ENABLE_TAG
     printf("\t+tag\n");
 #endif
 
-#if (PAR_CUCKOO_WIDTH > 1)
-    printf("\t+%d-way cuckoo_path\n", PAR_CUCKOO_WIDTH);
+#if (MEMC3_ASSOC_CUCKOO_WIDTH > 1)
+    printf("\t+%d-way cuckoo_path\n", MEMC3_ASSOC_CUCKOO_WIDTH);
 #endif
 
 #endif
 
 
-#ifdef ENABLE_GLOBAL_LOCK
+#ifdef MEMC3_LOCK_GLOBAL
     printf("\t+global lock\n");
 #endif
  
-#ifdef NO_LOCKING
+#ifdef MEMC3_LOCK_NONE
     printf("\t+no locking\n");
 #endif
 
-#ifdef ENABLE_OPT_LOCK
+#ifdef MEMC3_LOCK_OPT
     printf("\t+opt lock\n");
 #endif
 
-#ifdef ENABLE_FG_LOCK
+#ifdef MEMC3_LOCK_FINEGRAIN
     printf("\t+bucket lock\n");
 #endif
 
@@ -84,7 +84,7 @@ void print_memc3_settings()
 
 void *alloc(size_t size) 
 {
-#if defined(ENABLE_HUGEPAGE) && defined(__linux__)
+#if defined(MEMC3_ENABLE_HUGEPAGE) && defined(__linux__)
     if (size % HUGEPAGE_SIZE != 0)
 		size = (size / HUGEPAGE_SIZE + 1) * HUGEPAGE_SIZE;
 	int shmid = shmget(IPC_PRIVATE, size, /*IPC_CREAT |*/ SHM_HUGETLB | SHM_R | SHM_W);
@@ -113,7 +113,7 @@ void *alloc(size_t size)
 
 void dealloc(void *p)
 {
-#ifdef ENABLE_HUGEPAGE
+#ifdef MEMC3_ENABLE_HUGEPAGE
 	if (shmdt(p)) {
 		perror("");
 		assert(0);

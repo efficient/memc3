@@ -59,7 +59,7 @@ static inline void bv_setbit(void *bv, uint32_t index, uint8_t v) {
     bitmap[byte_index] |= byte_mask;
 }
 
-#ifdef ENABLE_INT_KEYCMP
+#ifdef MEMC3_ENABLE_INT_KEYCMP
 
 #define INT_KEYCMP_UNIT uint64_t
 

@@ -41,7 +41,7 @@ typedef struct {
     unsigned int killing;  /* index+1 of dying slab, or zero if none */
     size_t requested; /* The number of requested bytes */
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
     /* added by Bin: the bitmap used for clock */
     void *bitmap;  
     unsigned int bitmap_len;
@@ -193,7 +193,7 @@ static int grow_slab_list (const unsigned int id) {
         size_t new_size =  (p->list_size != 0) ? p->list_size * 2 : 16;
         void *new_list = realloc(p->slab_list, new_size * sizeof(void *));
         if (new_list == 0) return 0;
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
         // added by Bin:
         //size_t old_bitmap_len = p->bitmap_len;
         size_t new_bitmap_len = (new_size * p->perslab + 7) / 8;
@@ -229,7 +229,7 @@ static int do_slabs_newslab(const unsigned int id) {
     p->end_page_free = p->perslab;
 
     p->slab_list[p->slabs++] = ptr;
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
     p->clock_max = p->slabs * p->perslab;
 #endif
     mem_malloced += len;
@@ -259,7 +259,7 @@ static void *do_slabs_alloc(const size_t size, unsigned int id) {
         ret = NULL;
     } else if (p->sl_curr != 0) {
         /* return off our freelist */
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
         item *it = (item *)p->slots;
         p->slots = it->next;
         if (it->next) it->next->prev = 0;
@@ -267,7 +267,7 @@ static void *do_slabs_alloc(const size_t size, unsigned int id) {
         ret = (void *)it;
 #endif
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
         /* return off our freelist */
         slabbed_item* sl_it = (slabbed_item *)p->slots;
         p->slots = sl_it->next;
@@ -315,7 +315,7 @@ static void do_slabs_free(void *ptr, const size_t size, unsigned int id) {
     return;
 #endif
 
-#ifdef TEST_LRU
+#ifdef MEMC3_CACHE_LRU
     item *it = (item *)ptr;
     //it->it_flags |= ITEM_SLABBED;
     __sync_fetch_and_or(&it->it_flags, ITEM_SLABBED);
@@ -325,7 +325,7 @@ static void do_slabs_free(void *ptr, const size_t size, unsigned int id) {
     p->slots = it;
 #endif
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
     slabbed_item *sl_it = (slabbed_item *)ptr;
     //sl_it->it_flags |= ITEM_SLABBED;
     __sync_fetch_and_or(&sl_it->it_flags, ITEM_SLABBED);
@@ -523,7 +523,7 @@ void stop_slab_maintenance_thread(void) {
     pthread_join(maintenance_tid, NULL);
 }
 
-#ifdef TEST_CLOCK
+#ifdef MEMC3_CACHE_CLOCK
 static __attribute__((unused)) short firstzero[256] =                   \
                               {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 4,\
                                0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 5,\
