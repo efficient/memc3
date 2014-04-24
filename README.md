@@ -8,7 +8,8 @@ MemC3 is an in-memory key-value cache, derived from Memcached but improved with 
 Authors
 ======= 
 
-Bin Fan (binfan@cs.cmu.edu), David G. Andersen (dga@cs.cmu.edu), and Michael Kaminsky (michael.e.kaminsky@intel.com)
+MemC3 is developed by Bin Fan, David G. Andersen, and Michael Kaminsky. You can also email us at [libcuckoo-dev@googlegroups.com](mailto:libcuckoo-dev@googlegroups.com).
+
 
 Building
 ==========
