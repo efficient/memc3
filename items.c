@@ -102,10 +102,7 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
     if (id == 0)
         return 0;
 
-    //mutex_lock(&cache_lock);
-    /* do a quick check if we have any expired items in the tail.. */
-
-
+    mutex_lock(&cache_lock);
     if ((it = slabs_alloc(ntotal, id)) == NULL) {
         item *search = NULL;
 #ifdef MEMC3_CACHE_LRU
@@ -122,7 +119,6 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
         }
             
         it = search;
-        //assert(false);
         itemstats[id].evicted++;
         itemstats[id].evicted_time = current_time - it->time;
         if (it->exptime != 0)
@@ -161,15 +157,12 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
 #ifdef MEMC3_CACHE_LRU
     assert(it != heads[id]);
 #endif
-
     
-    //it->version = 1; // added by Bin
-
     /* Item initialization can happen outside of the lock; the item's already
      * been removed from the slab LRU.
      */
     //it->refcount = 1;     /* the caller will have a reference */
-    //mutex_unlock(&cache_lock);
+    mutex_unlock(&cache_lock);
 #ifdef MEMC3_CACHE_LRU
     it->next = it->prev = 0;
 #endif
@@ -180,7 +173,6 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
 
     DEBUG_REFCNT(it, '*');
 
-
     it->it_flags = settings.use_cas ? ITEM_CAS : 0;
     it->nkey = nkey;
     it->nbytes = nbytes;
@@ -190,9 +182,7 @@ item *do_item_alloc(char *key, const size_t nkey, const int flags, const rel_tim
     it->nsuffix = nsuffix;
 
     assert((it->it_flags & ITEM_LINKED) == 0);
-    //after_write(it);
     assert((it->slabs_clsid > 0));
-    //mutex_unlock(&cache_lock);
     return it;
 }
 
