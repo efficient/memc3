@@ -1,0 +1,10 @@
+# this is for kv, so 1 field only
+fieldcount=1
+# value length, let's do with 32byte values
+fieldlength=32
+# number of unique keys, 1M here
+recordcount=1000000
+# number of queries, 1M
+operationcount=1000000
+# distribution
+requestdistribution=latest
