@@ -22,10 +22,8 @@ Building
     $ ./configure
     $ make
 
-If you want to generate optimized build (e.g., with -O2), run
-    $ ./configure CFLAGS='-O2'
-before ``make``. Alternatively, if you want to create debug build (e.g., with -g -ggdb), use
-    $ ./configure CFLAGS='-g -ggdb'
+If you want to generate optimized build (e.g., with -O2), run ``./configure CFLAGS='-O2'`` instead of ``./configure``
+before ``make``. Alternatively, if you want to create debug build (e.g., with -g -ggdb), use ``./configure CFLAGS='-g -ggdb'``
 
 
 Benchmark
