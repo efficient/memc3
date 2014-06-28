@@ -232,7 +232,6 @@ static void create_worker(void *(*func)(void *), void *arg, int i) {
     CPU_SET(coreid, &cpuset);
     pthread_attr_init(&attr);
     pthread_attr_setaffinity_np(&attr, sizeof(cpu_set_t), &cpuset);  
-    fprintf(stderr, "bind thread %d to core %d\n", i, coreid);
 #endif
 
     if ((ret = pthread_create(&thread, &attr, func, arg)) != 0) {
@@ -302,7 +301,7 @@ static void *worker_libevent(void *arg) {
 
 #ifdef __linux__
     pthread_mutex_lock(&conn_lock);
-    fprintf(stderr, "bind thread (%ld) to core %d\n", syscall(SYS_gettid),  sched_getcpu());
+    fprintf(stderr, "bind worker thread (%ld) to core %d\n", syscall(SYS_gettid),  sched_getcpu());
     pthread_mutex_unlock(&conn_lock);
 #endif
 
