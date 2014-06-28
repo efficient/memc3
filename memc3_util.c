@@ -15,11 +15,7 @@
 
 void print_memc3_settings()
 {
-
     printf("memc3 settings:\n");
-    printf("\tkey_len = %d bytes\n", NKEY);
-    printf("\tval_len = %d bytes\n", NVAL);
-    
 #ifdef MEMC3_ASSOC_CHAIN 
     printf("\thashtable = built-in hashtable\n");
 #endif
@@ -36,7 +32,6 @@ void print_memc3_settings()
     printf("\t+perf_counting\n");
 #endif
 
-
 #ifdef MEMC3_ENABLE_HUGEPAGE
     printf("\t+hugepage\n");
 #endif
@@ -46,13 +41,10 @@ void print_memc3_settings()
 #endif
 
 #ifdef MEMC3_ASSOC_CUCKOO
-
     printf("\t+cuckoo \n");
-
 #ifdef MEMC3_ENABLE_TAG
     printf("\t+tag\n");
 #endif
-
 #if (MEMC3_ASSOC_CUCKOO_WIDTH > 1)
     printf("\t+%d-way cuckoo_path\n", MEMC3_ASSOC_CUCKOO_WIDTH);
 #endif

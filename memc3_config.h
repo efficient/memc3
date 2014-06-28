@@ -1,15 +1,8 @@
 #ifndef __MEMC3_CONFIG__
 #define __MEMC3_CONFIG__
 
-/*
- * size of the key in bytes
- */
-#define NKEY 16
-#define NVAL 32
-
 //#define MEMC3_ASSOC_CHAIN 1  
 #define MEMC3_ASSOC_CUCKOO 1
-
 
 /*
  * make sure one and only one option above is enabled
