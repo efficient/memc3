@@ -18,7 +18,8 @@ static void sha1(char hash[20], const char* buf, size_t count)
 int main(int argc, char **argv) {
 
     if (argc <= 1) {
-        cout << "usage: preprocess  output_filename < input_filename" << endl;
+        cout << "usage: ./bench_trace_gen  output_filename < input_filename" 
+             << endl;
         exit (1);
     }
 
