@@ -542,7 +542,6 @@ enum store_item_type do_store_item(item *it, const uint32_t hv) {
     } 
     before_write(it);
     int ret = do_item_link_nolock(it, hv);
-    assert(memcmp(ITEM_data(it), ITEM_key(it), it->nkey) == 0);
     after_write(it);
 
     if (ret == 0) {

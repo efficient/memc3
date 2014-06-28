@@ -604,18 +604,7 @@ extern void drop_privileges(void);
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 
-// added by Bin
 #define memory_barrier() __sync_synchronize()
-
-//#define ITEM_version(it) __sync_fetch_and_add(&it->version, 0);
-
-/* #define reset_version(it) \ */
-/*     __sync_fetch_and_and(&it->version, 0);      \ */
-/*     memory_barrier() */
-
-/* #define before_write(it) \ */
-/*     refcount_incr(&it->version);              \ */
-/*     memory_barrier() */
 
 #define before_write(it) \
     memory_barrier()
